@@ -1,0 +1,416 @@
+
+
+<!-- Include Splide Slider in the Featured Collection Section -->
+<div id="featured-collection-{{ section.id }}" class="top-spacing-{{ section.settings.top_spacing }}" data-section-name="featured-collection">
+    <div class="{{ section.settings.width }} mb--last-child-0">
+      
+      {%- render "section-heading" -%}
+  
+      <!-- Splide Slider Start -->
+      <div id="splide3" class="splide">
+        <div class="splide__track">
+          <ul class="splide__list">
+            {%- if section.settings.collection != blank -%}
+            {%- for product in section.settings.collection.products limit: section.settings.product_limit -%}
+            <li class="splide__slide col-sp-{{ section.settings.mobile_grid }} {{ section.settings.grid }}">
+              {%- liquid
+                  if section.settings.width == "page-wide"
+                  assign page_is_wide = true
+                  else
+                  assign page_is_wide = false
+                  endif
+              -%}
+              {%- render "product-card",
+                  product_card_product: product,
+                  settings_image_ratio: section.settings.image_ratio,
+                  show_button_quickview: section.settings.show_button_quickview,
+                  show_badge_sold_out: section.settings.show_badge_sold_out,
+                  show_badge_on_sale: section.settings.show_badge_on_sale,
+                  show_badge_feature: section.settings.show_badge_feature,
+                  show_secondary_image: section.settings.show_secondary_image,
+                  show_vendor: section.settings.show_vendor,
+                  show_type: section.settings.show_type,
+                  product_name_size: section.settings.product_name_size,
+                  hover_underline: section.settings.hover_underline,
+                  truncate_product_name: section.settings.truncate_product_name,
+                  show_rating: section.settings.show_rating,
+                  show_price: section.settings.show_price,
+                  button_type_product: section.settings.button_type_product,
+                  page_is_wide: page_is_wide,
+                  section_id: section.id
+              -%}
+            </li>
+            {%- endfor -%}
+            {%- else -%}
+            {%- for i in (1..section.settings.product_limit) -%}
+            <li class="splide__slide col-sp-{{ section.settings.mobile_grid }} {{ section.settings.grid }}">
+              {%- capture placeholder_name -%}
+              {%- cycle 'product-1', 'product-2', 'product-3', 'product-4', 'product-5', 'product-6' -%}
+              {%- endcapture -%}
+              {%- render "product-card-placeholder",
+                  settings_image_ratio: section.settings.image_ratio,
+                  show_vendor: section.settings.show_vendor,
+                  show_type: section.settings.show_type,
+                  product_name_size: section.settings.product_name_size,
+                  hover_underline: section.settings.hover_underline,
+                  truncate_product_name: section.settings.truncate_product_name,
+                  show_price: section.settings.show_price,
+                  button_type_product: section.settings.button_type_product,
+                  placeholder_name: placeholder_name
+              -%}
+            </li>
+            {%- endfor -%}
+            {%- endif -%}
+          </ul>
+        </div>
+      </div>
+      <!-- Splide Slider End -->
+  
+      {%- if section.settings.button_name != blank and section.settings.collection.products.size > section.settings.product_limit -%}
+      <div class="grid self_mt_60 {{ section.settings.heading_aligment }}">
+        <div class="col-12">
+          <a href="{{ section.settings.collection.url }}" class="btn btn_zoom btn--secondary w-full-sp">
+            <span>{{ section.settings.button_name }}</span>
+          </a>
+        </div>
+      </div>
+      {%- endif -%}
+  
+    </div>
+  </div>
+  
+  {%- if section.settings.button_type_product != 'hide' or section.settings.show_button_quickview -%}
+  <script src="{{ 'quick-add.min.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+  
+  <!-- Custom script to load Splide and initialize it -->
+  {% javascript %}
+   document.addEventListener('DOMContentLoaded', function () {
+      // Dynamically load Splide's CSS
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css';
+      document.head.appendChild(link);
+  
+      // Dynamically load Splide's JS
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js';
+      document.head.appendChild(script);
+  
+      // Initialize Splide after the script has loaded
+      script.onload = function () {
+          new Splide('#splide3', {
+              loop: true,
+              perPage: 2,
+              breakpoints: {
+                  640: {
+                      perPage: 1,
+                  },
+              },
+          }).mount();
+      };
+  });
+  
+  {% endjavascript %}
+  
+  
+  {% schema %}
+  {
+      "name": "Ca Featured Collection",
+      "tag": "section",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "header",
+          "content": "Header Section"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "default": "SUBHEADING",
+          "label": "Subheading"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Featured collection",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_aligment",
+          "options": [
+            {
+              "value": "text-left",
+              "label": "Left"
+            },
+            {
+              "value": "text-center",
+              "label": "Center"
+            }
+          ],
+          "default": "text-center",
+          "label": "Heading Alignment",
+          "info": "Choose the alignment of the heading."
+        },
+        {
+          "type": "header",
+          "content": "Button Settings"
+        },
+        {
+          "type": "text",
+          "id": "button_name",
+          "default": "Show All",
+          "label": "Button Name",
+          "info": "Text for the button."
+        },
+        {
+          "type": "header",
+          "content": "Layout Settings"
+        },
+        {
+          "type": "select",
+          "id": "top_spacing",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "normal",
+              "label": "Normal"
+            }
+          ],
+          "default": "normal",
+          "label": "Top Spacing"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "options": [
+            {
+              "value": "page-width",
+              "label": "Boxed"
+            },
+            {
+              "value": "page-wide",
+              "label": "Wide"
+            }
+          ],
+          "default": "page-width",
+          "label": "Section Width",
+          "info": "Choose the width of the section."
+        },
+        {
+          "type": "select",
+          "id": "grid",
+          "options": [
+            {
+              "value": "col-6",
+              "label": "2 Columns"
+            },
+            {
+              "value": "col-4",
+              "label": "3 Columns"
+            },
+            {
+              "value": "col-st-6 col-3",
+              "label": "4 Columns"
+            },
+            {
+              "value": "col-md-4 col-one_fifth",
+              "label": "5 Columns"
+            },
+            {
+              "value": "col-md-4 col-2",
+              "label": "6 Columns"
+            }
+          ],
+          "default": "col-md-4 col-one_fifth",
+          "label": "Grid Layout"
+        },
+        {
+          "type": "select",
+          "id": "mobile_grid",
+          "options": [
+            {
+              "value": "12",
+              "label": "1 Column"
+            },
+            {
+              "value": "6",
+              "label": "2 Columns"
+            }
+          ],
+          "default": "6",
+          "label": "Mobile Grid Layout"
+        },
+        {
+          "type": "checkbox",
+          "id": "swipe_on_mobile",
+          "default": true,
+          "label": "Enable Swipe on Mobile"
+        },
+        {
+          "type": "range",
+          "id": "product_limit",
+          "min": 2,
+          "max": 20,
+          "step": 1,
+          "default": 12,
+          "label": "Product Limit",
+          "info": "Set the number of products to display."
+        },
+        {
+          "type": "header",
+          "content": "Image Settings"
+        },
+        {
+          "type": "select",
+          "id": "image_ratio",
+          "options": [
+            {
+              "value": "adaptative",
+              "label": "Adaptative"
+            },
+            {
+              "value": "square",
+              "label": "Square"
+            }
+          ],
+          "default": "adaptative",
+          "label": "Image Ratio"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_secondary_image",
+          "default": true,
+          "label": "Show Secondary Image"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_vendor",
+          "default": false,
+          "label": "Show Vendor"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_type",
+          "default": false,
+          "label": "Show Product Type"
+        },
+        {
+          "type": "select",
+          "id": "product_name_size",
+          "options": [
+            {
+              "value": "default",
+              "label": "Default"
+            },
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            }
+          ],
+          "default": "default",
+          "label": "Product Name Size"
+        },
+        {
+          "type": "checkbox",
+          "id": "hover_underline",
+          "default": true,
+          "label": "Underline on Hover"
+        },
+        {
+          "type": "checkbox",
+          "id": "truncate_product_name",
+          "default": true,
+          "label": "Truncate Product Name"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_rating",
+          "default": false,
+          "label": "Show Rating"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_price",
+          "default": true,
+          "label": "Show Price"
+        },
+        {
+          "type": "header",
+          "content": "Button Settings"
+        },
+        {
+          "type": "select",
+          "id": "button_type_product",
+          "options": [
+            {
+              "value": "add-to-cart",
+              "label": "Add to Cart"
+            },
+            {
+              "value": "buy-now",
+              "label": "Buy Now"
+            },
+            {
+              "value": "hide",
+              "label": "Hide"
+            }
+          ],
+          "default": "add-to-cart",
+          "label": "Button Type"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_button_quickview",
+          "default": true,
+          "label": "Show Quickview Button"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_badge_on_sale",
+          "default": true,
+          "label": "Show Sale Badge"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_badge_sold_out",
+          "default": true,
+          "label": "Show Sold Out Badge"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_badge_feature",
+          "default": false,
+          "label": "Show Featured Badge"
+        }
+      ],
+      "presets": [
+        {
+          "name": "Ca Featured Collection",
+          "category": "Collections"
+        }
+      ]
+  }
+  
+  {% endschema %}
+  
