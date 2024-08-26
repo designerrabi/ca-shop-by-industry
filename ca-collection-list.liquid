@@ -1,0 +1,902 @@
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include Slick CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
+<!-- Include Slick JS -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+
+  
+
+{% comment %}
+<!-- Include Splide CSS -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/splidejs@3.6.12/dist/css/splide.min.css">
+
+<!-- Include Splide JS -->
+<script src="https://cdn.jsdelivr.net/npm/splidejs@3.6.12/dist/js/splide.min.js"></script>
+{% endcomment %}
+
+
+
+{%- if section.settings.design_type == "text-below-image" -%}
+{%- assign css_file = 'section-collection-list.css' -%}
+{%- assign colection_type = 'type1' -%}
+{%- else -%}
+{%- assign css_file = 'section-collection-list-type2.css' -%}
+{%- assign colection_type = 'type2' -%}
+{%- endif -%}
+
+{%- if settings.animate_content_show -%}
+<link rel="stylesheet" href="{{ css_file | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ css_file | asset_url | stylesheet_tag }}</noscript>
+{%- if section.settings.swipe_on_mobile -%}
+<link rel="stylesheet" href="{{ 'component-slider.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'component-slider.css' | asset_url | stylesheet_tag }}</noscript>
+{%- endif -%}
+{%- else -%}
+{{ css_file | asset_url | stylesheet_tag }}
+{%- if section.settings.swipe_on_mobile -%}
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+{%- endif -%}
+
+{%- if section.settings.design_type == "text-over-image" -%}
+{%- capture section_styles -%}
+{%- if section.settings.color_texts != "rgba(0,0,0,0)" -%}
+#collection-list-type2-{{ section.id }} .collection-list-type2{
+  color: {{ section.settings.color_texts }};
+}
+#collection-list-type2-{{ section.id }} .collection-list-type2-pad{
+  --color-base: {{ section.settings.color_texts }};
+}
+{%- endif -%}   
+{%- if section.settings.color_button != "rgba(0,0,0,0)" -%}
+#collection-list-type2-{{ section.id }} .collection-list-type2__icon:before{
+  --color-accent: {{ section.settings.color_button }};
+}
+{%- assign accent_brightness = section.settings.color_button | color_extract: 'lightness' -%}
+{%- else -%}
+{%- assign accent_brightness = settings.color_accent | color_extract: 'lightness' -%}
+{%- endif -%}
+#collection-list-type2-{{ section.id }} .collection-list-type2__icon svg path{
+  {%- if accent_brightness < 50 -%}
+  --color-icon-arrow: var(--auto-text-color-button-light);
+  {%- else -%}
+  --color-icon-arrow: var(--auto-text-color-button-dark);
+  {%- endif -%}
+}
+{%- if section.settings.color_button_hover != "rgba(0,0,0,0)" -%}
+#collection-list-type2-{{ section.id }} .collection-list-type2:hover .collection-list-type2__icon:before{
+  --color-base: {{ section.settings.color_button_hover }};
+}
+{%- assign accent_brightness = section.settings.color_button_hover | color_extract: 'lightness' -%}
+{%- else -%}
+{%- assign accent_brightness = settings.color_base | color_extract: 'lightness' -%}
+{%- endif -%}
+#collection-list-type2-{{ section.id }} .collection-list-type2:hover .collection-list-type2__icon svg path{
+  {% if accent_brightness < 50 %}
+  --color-icon-arrow-hover: var(--auto-text-color-button-light);
+  {%- else -%}
+  --color-icon-arrow-hover: var(--auto-text-color-button-dark);
+  {%- endif -%}
+}
+{%- endcapture -%}
+{%- if section_styles != blank -%}
+<style>
+  @media (min-width: 577px){
+    {{ section_styles }}
+  }
+</style>
+{%- endif -%}
+{%- endif -%}
+
+<div id="collection-list-{{ colection_type }}-{{ section.id }}" class="top-spacing-{{ section.settings.top_spacing }}"
+     data-section-name="section.settings.design_type">
+  <div class="{{ section.settings.width }} mb--last-child-0">
+
+    {%- liquid
+    	if section.settings.link_name != blank
+          assign show_heading_always = true
+        else
+          assign show_heading_always = false
+        endif
+    -%}
+    
+    {%- render "section-heading" section:section show_heading_always:show_heading_always -%}
+    {% comment %}
+<div class="position-relative">
+  <div class="splide" id="collection-slider">
+    <div class="splide__track">
+      <div class="splide__list custom-splide-list">
+        {%- for block in section.blocks -%}
+          <div class="col-sp splide__slide collection-custom-slider"}>
+
+            {%- if block.settings.collection == blank -%}
+            <div class="collection-list-{{ colection_type }}{% if settings.enable_zoom_animation %} image-hover-scaling-up{% endif %} hover-area">
+              <div class="image-hover-scaling__image placeholder__svg--bg border__radius{% if section.settings.design_type == "text-below-image" %}-top{% endif %}"{% if section.settings.image_ratio != 'auto' %} style="--aspect-ratio: {{section.settings.image_ratio}};"{% endif %}>
+                {%- capture placeholder_name -%}
+                {%- cycle 'collection-1', 'collection-2', 'collection-3', 'collection-4', 'collection-5', 'collection-6' -%}
+                {%- endcapture -%}
+                {%- render "icons-placeholder-collection", icon_name:placeholder_name -%}
+              </div>
+              <div class="collection-list-{{ colection_type }}-pad {{ section.settings.texts_aligment_mobile }}">
+                <div class="h5{% if section.settings.hover_underline %} animation-underline{% endif %}">{{ 'onboarding.collection_title' | t }}</div>
+                {%- if section.settings.show_products_count -%}
+                <p class="body2 mt3">{{ 'sections.collection_list.items_count' | t: count: 0 }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+            {%- else -%}
+
+            {%- liquid
+            if block.settings.custom_link != blank
+            assign href = block.settings.custom_link
+            else
+            assign href = block.settings.collection.url
+            endif
+            -%}
+
+            <a href="{{ href }}" class="collection-list-{{ colection_type }} a--remove-hover-underline{% if settings.enable_zoom_animation %} image-hover-scaling-up{% endif %} hover-area">
+              {%- capture image_ratio -%}
+              {%- if section.settings.image_ratio == 'auto' -%}
+              {%- if block.settings.image != blank -%}{{block.settings.image.aspect_ratio}}
+              {%- elsif block.settings.collection.image != blank -%}{{block.settings.collection.image.aspect_ratio}}
+              {%- else -%}1
+              {%- endif -%}
+              {%- else -%}
+              {{ section.settings.image_ratio }}
+              {%- endif -%}
+              {%- endcapture -%}
+
+              <div class="image-hover-scaling__image border__radius{% if section.settings.design_type == "text-below-image" %}-top{% endif %}" style="--aspect-ratio: {{image_ratio}};">
+                {%- if block.settings.image != blank -%}
+                {%- assign image = block.settings.image -%}
+                <img src="{{ image | image_url }}" alt="{{ image.alt | escape }}">
+                {%- elsif block.settings.collection.featured_image != blank -%}
+                {%- assign image = block.settings.collection.featured_image -%}    
+                <img src="{{ image | image_url }}" alt="{{ image.alt | escape }}">
+                {%- else  -%}
+                {%- capture placeholder_name -%}
+                {%- cycle 'collection-1', 'collection-2', 'collection-3', 'collection-4', 'collection-5', 'collection-6' -%}
+                {%- endcapture -%}
+                {%- render "icons-placeholder-collection", icon_name:placeholder_name -%}
+                {%- endif -%}
+              </div>
+
+              <div class="collection-list-{{ colection_type }}-pad {{ section.settings.texts_aligment_mobile }}">
+                <div class="h5 {% if section.settings.hover_underline %} animation-underline{% endif %}">
+                  {%- if block.settings.collection_name != blank -%}
+                  {{- block.settings.collection_name -}}
+                  {%- else -%}
+                  {{- block.settings.collection.title | escape -}}
+                  {%- endif -%}
+                </div>
+
+                {%- if section.settings.show_products_count -%}
+                <p class="body2 mt3">{{ 'sections.collection_list.items_count' | t: count: block.settings.collection.products_count }}</p>
+                {%- endif -%}
+              </div>
+              {%- if section.settings.design_type == "text-over-image" -%}
+              <div class="collection-list-type2__icon">
+                {%- render "icon-arrow-right" -%}
+              </div>
+              {%- endif -%}
+            </a>
+
+            {%- endif -%}
+
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var splide = new Splide('#collection-slider', {
+        type       : 'loop',
+        perPage    : 4, // Number of items to show per page
+        perMove    : 1,
+        breakpoints : {
+          640: {
+            perPage: 1, // Mobile view
+          },
+          768: {
+            perPage: 2, // Tablet view
+          },
+        },
+      });
+      splide.mount();
+    });
+  </script>
+
+  <style>
+    .collection-custom-slider.splide__slide {
+      padding: 10px; /* Adjust padding as needed */
+      flex: 0 0 calc(100% / 4); /* Ensure 6 items fit per page */
+    }
+    
+   .custom-splide-list.splide__list {
+      display: flex; /* Ensure that slides are aligned in a row */
+      justify-content: space-between; /* Space the items evenly */
+    }
+  </style>
+</div>
+
+///////////////////////////////////////////////////////////
+    <div class="position-relative">
+  <div class="splide" id="collection-slider">
+    <div class="splide__track">
+      <div class="splide__list custom-grid-list">
+        {%- for block in section.blocks -%}
+          <div class="splide__slide">
+            <div class="collection-grid-item">
+
+              {%- if block.settings.collection == blank -%}
+              <div class="collection-list-{{ colection_type }}{% if settings.enable_zoom_animation %} image-hover-scaling-up{% endif %} hover-area">
+                <div class="image-hover-scaling__image placeholder__svg--bg border__radius{% if section.settings.design_type == "text-below-image" %}-top{% endif %}"{% if section.settings.image_ratio != 'auto' %} style="--aspect-ratio: {{section.settings.image_ratio}};"{% endif %}>
+                  {%- capture placeholder_name -%}
+                  {%- cycle 'collection-1', 'collection-2', 'collection-3', 'collection-4', 'collection-5', 'collection-6' -%}
+                  {%- endcapture -%}
+                  {%- render "icons-placeholder-collection", icon_name:placeholder_name -%}
+                </div>
+                <div class="collection-list-{{ colection_type }}-pad {{ section.settings.texts_aligment_mobile }}">
+                  <div class="h5{% if section.settings.hover_underline %} animation-underline{% endif %}">{{ 'onboarding.collection_title' | t }}</div>
+                  {%- if section.settings.show_products_count -%}
+                  <p class="body2 mt3">{{ 'sections.collection_list.items_count' | t: count: 0 }}</p>
+                  {%- endif -%}
+                </div>
+              </div>
+              {%- else -%}
+
+              {%- liquid
+              if block.settings.custom_link != blank
+              assign href = block.settings.custom_link
+              else
+              assign href = block.settings.collection.url
+              endif
+              -%}
+
+              <a href="{{ href }}" class="collection-list-{{ colection_type }} a--remove-hover-underline{% if settings.enable_zoom_animation %} image-hover-scaling-up{% endif %} hover-area">
+                {%- capture image_ratio -%}
+                {%- if section.settings.image_ratio == 'auto' -%}
+                {%- if block.settings.image != blank -%}{{block.settings.image.aspect_ratio}}
+                {%- elsif block.settings.collection.image != blank -%}{{block.settings.collection.image.aspect_ratio}}
+                {%- else -%}1
+                {%- endif -%}
+                {%- else -%}
+                {{ section.settings.image_ratio }}
+                {%- endif -%}
+                {%- endcapture -%}
+
+                <div class="image-hover-scaling__image border__radius{% if section.settings.design_type == "text-below-image" %}-top{% endif %}" style="--aspect-ratio: {{image_ratio}};">
+                  {%- if block.settings.image != blank -%}
+                  {%- assign image = block.settings.image -%}
+                  <img src="{{ image | image_url }}" alt="{{ image.alt | escape }}">
+                  {%- elsif block.settings.collection.featured_image != blank -%}
+                  {%- assign image = block.settings.collection.featured_image -%}    
+                  <img src="{{ image | image_url }}" alt="{{ image.alt | escape }}">
+                  {%- else  -%}
+                  {%- capture placeholder_name -%}
+                  {%- cycle 'collection-1', 'collection-2', 'collection-3', 'collection-4', 'collection-5', 'collection-6' -%}
+                  {%- endcapture -%}
+                  {%- render "icons-placeholder-collection", icon_name:placeholder_name -%}
+                  {%- endif -%}
+                </div>
+
+                <div class="collection-list-{{ colection_type }}-pad {{ section.settings.texts_aligment_mobile }}">
+                  <div class="h5 {% if section.settings.hover_underline %} animation-underline{% endif %}">
+                    {%- if block.settings.collection_name != blank -%}
+                    {{- block.settings.collection_name -}}
+                    {%- else -%}
+                    {{- block.settings.collection.title | escape -}}
+                    {%- endif -%}
+                  </div>
+
+                  {%- if section.settings.show_products_count -%}
+                  <p class="body2 mt3">{{ 'sections.collection_list.items_count' | t: count: block.settings.collection.products_count }}</p>
+                  {%- endif -%}
+                </div>
+                {%- if section.settings.design_type == "text-over-image" -%}
+                <div class="collection-list-type2__icon">
+                  {%- render "icon-arrow-right" -%}
+                </div>
+                {%- endif -%}
+              </a>
+
+              {%- endif -%}
+
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var splide = new Splide('#collection-slider', {
+      type       : 'loop',
+      perPage    : 8, // Number of "pages" (each containing 8 items) to show per slide
+      perMove    : 1,
+      pagination : true, // Enable pagination dots
+      breakpoints : {
+        640: {
+          perPage: 1, // Mobile view
+        },
+        768: {
+          perPage: 1, // Tablet view
+        },
+      },
+    });
+    splide.mount();
+  });
+</script>
+
+<style>
+  .custom-grid-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 items per row */
+    grid-template-rows: repeat(2, auto); /* 2 rows per slide */
+    gap: 10px; /* Adjust gap as needed */
+  }
+
+  .collection-grid-item {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 768px) {
+    .custom-grid-list {
+      grid-template-columns: repeat(2, 1fr); /* 2 items per row */
+      grid-template-rows: repeat(4, auto); /* 4 rows per slide */
+    }
+  }
+
+  @media (max-width: 640px) {
+    .custom-grid-list {
+      grid-template-columns: 1fr; /* 1 item per row */
+      grid-template-rows: repeat(8, auto); /* 8 rows per slide */
+    }
+  }
+</style>
+
+{% endcomment %}
+
+<!-- Include Slick CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
+
+    
+<div class="position-relative">
+    <button class="slick-prev-custom" type="button">
+        {% render 'icon-arrow-left' %}
+    </button>
+    <div class="slick-slider" id="slick1">
+        {%- for block in section.blocks -%}
+        <div class="slick-slide ">
+            <div class="collection-grid-item">
+
+                {%- if block.settings.collection == blank -%}
+                <div class="collection-list-{{ colection_type }}{% if settings.enable_zoom_animation %} image-hover-scaling-up{% endif %} hover-area">
+                    <div class="image-hover-scaling__image placeholder__svg--bg border__radius{% if section.settings.design_type == "text-below-image" %}-top{% endif %}"{% if section.settings.image_ratio != 'auto' %} style="--aspect-ratio: {{section.settings.image_ratio}};"{% endif %}>
+                        {%- capture placeholder_name -%}
+                        {%- cycle 'collection-1', 'collection-2', 'collection-3', 'collection-4', 'collection-5', 'collection-6' -%}
+                        {%- endcapture -%}
+                        {%- render "icons-placeholder-collection", icon_name:placeholder_name -%}
+                    </div>
+                    <div class="collection-list-{{ colection_type }}-pad {{ section.settings.texts_aligment_mobile }}">
+                        <div class="h5{% if section.settings.hover_underline %} animation-underline{% endif %}">{{ 'onboarding.collection_title' | t }}</div>
+                        {%- if section.settings.show_products_count -%}
+                        <p class="body2 mt3">{{ 'sections.collection_list.items_count' | t: count: 0 }}</p>
+                        {%- endif -%}
+                    </div>
+                </div>
+                {%- else -%}
+
+                {%- liquid
+                if block.settings.custom_link != blank
+                assign href = block.settings.custom_link
+                else
+                assign href = block.settings.collection.url
+                endif
+                -%}
+
+                <a href="{{ href }}" class="collection-list-{{ colection_type }} a--remove-hover-underline{% if settings.enable_zoom_animation %} image-hover-scaling-up{% endif %} hover-area">
+                    {%- capture image_ratio -%}
+                    {%- if section.settings.image_ratio == 'auto' -%}
+                    {%- if block.settings.image != blank -%}{{block.settings.image.aspect_ratio}}
+                    {%- elsif block.settings.collection.image != blank -%}{{block.settings.collection.image.aspect_ratio}}
+                    {%- else -%}1
+                    {%- endif -%}
+                    {%- else -%}
+                    {{ section.settings.image_ratio }}
+                    {%- endif -%}
+                    {%- endcapture -%}
+
+                    <div class="image-hover-scaling__image border__radius{% if section.settings.design_type == "text-below-image" %}-top{% endif %}" style="--aspect-ratio: {{image_ratio}};">
+                        {%- if block.settings.image != blank -%}
+                        {%- assign image = block.settings.image -%}
+                        <img src="{{ image | image_url }}" alt="{{ image.alt | escape }}">
+                        {%- elsif block.settings.collection.featured_image != blank -%}
+                        {%- assign image = block.settings.collection.featured_image -%}    
+                        <img src="{{ image | image_url }}" alt="{{ image.alt | escape }}">
+                        {%- else  -%}
+                        {%- capture placeholder_name -%}
+                        {%- cycle 'collection-1', 'collection-2', 'collection-3', 'collection-4', 'collection-5', 'collection-6' -%}
+                        {%- endcapture -%}
+                        {%- render "icons-placeholder-collection", icon_name:placeholder_name -%}
+                        {%- endif -%}
+                    </div>
+
+                    <div class="collection-list-{{ colection_type }}-pad {{ section.settings.texts_aligment_mobile }}">
+                        <div class="h5 {% if section.settings.hover_underline %} animation-underline{% endif %}">
+                            {%- if block.settings.collection_name != blank -%}
+                            {{- block.settings.collection_name -}}
+                            {%- else -%}
+                            {{- block.settings.collection.title | escape -}}
+                            {%- endif -%}
+                        </div>
+
+                        {%- if section.settings.show_products_count -%}
+                        <p class="body2 mt3">{{ 'sections.collection_list.items_count' | t: count: block.settings.collection.products_count }}</p>
+                        {%- endif -%}
+                    </div>
+                    {%- if section.settings.design_type == "text-over-image" -%}
+                    <div class="collection-list-type2__icon">
+                        {%- render "icon-arrow-right" -%}
+                    </div>
+                    {%- endif -%}
+                </a>
+
+                {%- endif -%}
+
+            </div>
+        </div>
+        {%- endfor -%}
+    </div>
+    <button class="slick-next-custom" type="button">
+        {% render 'icon-arrow-right' %}
+    </button>
+</div>
+
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include Slick JS -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+<script>
+ jQuery.noConflict();
+jQuery(document).ready(function($) {
+    $('#slick1').slick({
+        rows: 2,
+        slidesToShow: 4,
+        slidesToScroll: 4,
+        dots: false,
+        arrows: true,
+        prevArrow: $('.slick-prev-custom'), // Use custom previous button
+        nextArrow: $('.slick-next-custom'), // Use custom next button
+        infinite: true,
+        speed: 300,
+        responsive: [
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 2,
+                    rows: 2
+                }
+            },
+            {
+                breakpoint: 640,
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1,
+                    rows: 2
+                }
+            }
+        ]
+    });
+});
+</script>
+
+
+<style>
+.collection-grid-item {
+    max-width: 313px;
+    height: auto;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+  .slick-slide {
+    margin: 0 5px; /* Half of the total gap (5px on each side) */
+}
+
+.slick-list {
+    margin: 0 -5px; /* Compensate for the slide margin */
+}
+ .slick-prev, .slick-next {
+    display: none; /* Hide default Slick slider buttons */
+}
+
+/* Custom Button Styling */
+.slick-prev-custom, .slick-next-custom {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #006;
+    border: none;
+    font-size: 26px;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 1;
+    border-radius: 50%;
+}
+  button.slick-next-custom.slick-arrow svg.theme-icon path {
+    /* fill: var(--color-base); */
+    fill: #ffffff !important;
+}
+  button.slick-prev-custom.slick-arrow svg.theme-icon path {
+    /* fill: var(--color-base); */
+    fill: #ffffff !important;
+}
+
+.slick-prev-custom {
+    left: -50px; /* Adjust the left position */
+}
+
+.slick-next-custom {
+    right: -50px; /* Adjust the right position */
+}
+
+.slick-prev-custom:focus, .slick-next-custom:focus {
+    outline: none;
+}
+
+
+</style>
+
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "ca-collection-list",
+  	"tag": "section",
+    "settings": [
+	  {
+		"type": "text",
+		"id": "subheading",
+		"default": "SUBHEADING",
+		"label": "t:sections.general.settings.subheading.label"
+	  },
+	  {
+		"type": "text",
+		"id": "heading",
+		"default": "Collection list",
+		"label": "t:sections.general.settings.heading.label"
+	  },
+	  {
+		"type": "select",
+		"id": "heading_aligment",
+		"options": [
+		  {
+			"value": "text-left",
+			"label": "t:sections.general.settings.texts_aligment.options__left.label"
+		  },
+		  {
+			"value": "text-center",
+			"label": "t:sections.general.settings.texts_aligment.options__center.label"
+		  }
+		],
+		"default": "text-center",
+		"label": "t:sections.general.settings.heading_aligment.label",
+		"info": "t:sections.general.settings.heading_aligment.info"
+	  },
+      {
+        "type": "header",
+        "content": "t:sections.general.settings.name_link.label"
+      },
+	  {
+		"type": "text",
+		"id": "link_name",
+		"default": "Shop all",
+		"label": "t:sections.collection-list.settings.link_name.label"
+	  },
+      {
+        "type": "url",
+        "id": "link_url",
+        "label": "t:sections.collection-list.settings.link_url.label"
+      },
+      {
+        "type": "header",
+        "content": "t:sections.general.settings.header_layout.content"
+      },
+      {
+        "type": "select",
+        "id": "top_spacing",
+        "options": [
+          {
+            "value": "none",
+            "label": "t:sections.general.settings.top_spacing.options__none.label"
+          },
+          {
+            "value": "small",
+            "label": "t:sections.general.settings.top_spacing.options__small.label"
+          },
+          {
+            "value": "medium",
+            "label": "t:sections.general.settings.top_spacing.options__medium.label"
+          },
+          {
+            "value": "normal",
+            "label": "t:sections.general.settings.top_spacing.options__normal.label"
+          }
+        ],
+        "default": "normal",
+		"label": "t:sections.general.settings.top_spacing.label"
+      },
+      {
+        "type": "select",
+        "id": "width",
+        "options": [
+          {
+            "value": "page-width",
+            "label": "t:sections.general.settings.width.options__boxed.label"
+          },
+          {
+            "value": "page-wide",
+            "label": "t:sections.general.settings.width.options__wide.label"
+          }
+        ],
+        "default": "page-width",
+        "label": "t:sections.general.settings.width.label",
+		"info": "t:sections.general.settings.width.info"
+      },
+      {
+        "type": "select",
+        "id": "grid",
+        "options": [
+          {
+            "value": "col-6",
+            "label": "t:sections.general.settings.grid.options__2.label"
+          },
+          {
+            "value": "col-4",
+            "label": "t:sections.general.settings.grid.options__3.label"
+          },
+          {
+            "value": "col-md-6 col-3",
+            "label": "t:sections.general.settings.grid.options__4.label"
+          },
+          {
+            "value": "col-md-4 col-one_fifth",
+            "label": "t:sections.general.settings.grid.options__5.label"
+          },
+          {
+            "value": "col-md-4 col-2",
+            "label": "t:sections.general.settings.grid.options__6.label"
+          }
+        ],
+        "default": "col-md-4 col-2",
+        "label": "t:sections.general.settings.grid.label"
+      },
+      {
+        "type": "select",
+        "id": "mobile_grid",
+        "options": [
+          {
+            "value": "12",
+            "label": "t:sections.general.settings.mobile_grid.options__1.label"
+          },
+          {
+            "value": "6",
+            "label": "t:sections.general.settings.mobile_grid.options__2.label"
+          }
+        ],
+        "default": "6",
+        "label": "t:sections.general.settings.mobile_grid.label"
+      },
+      {
+        "type": "checkbox",
+        "id": "swipe_on_mobile",
+        "default": false,
+        "label": "t:sections.general.settings.swipe_on_mobile.label"
+      },
+      {
+        "type": "header",
+		"content": "t:sections.collection-list.settings.header_collections.content"
+      },
+	  {
+		"type": "select",
+		"id": "design_type",
+		"options": [
+		  {
+			"value": "text-below-image",
+			"label": "t:sections.collection-list.settings.design_type.option_1.label"
+		  },
+		  {
+			"value": "text-over-image",
+			"label": "t:sections.collection-list.settings.design_type.option_2.label"
+		  }
+		],
+		"default": "text-below-image",
+		"label": "t:sections.collection-list.settings.design_type.label"
+	  },
+      {
+        "type": "select",
+        "id": "image_ratio",
+        "options": [
+          {
+            "value": "auto",
+			"label": "t:sections.general.settings.image_ratio.options__auto.label"
+          },
+          {
+            "value": "0.75",
+			"label": "t:sections.general.settings.image_ratio.options__portrait.label"
+          },
+          {
+            "value": "1.333333",
+			"label": "t:sections.general.settings.image_ratio.options__landscape.label"
+          },
+          {
+            "value": "1",
+			"label": "t:sections.general.settings.image_ratio.options__square.label"
+          }
+        ],
+        "default": "auto",
+        "label": "t:sections.general.settings.image_ratio.label"
+      },
+	  {
+		"type": "select",
+		"id": "texts_aligment",
+		"options": [
+		  {
+			"value": "text-left",
+			"label": "t:sections.general.settings.texts_aligment.options__left.label"
+		  },
+		  {
+			"value": "text-center",
+			"label": "t:sections.general.settings.texts_aligment.options__center.label"
+		  }
+		],
+		"default": "text-center",
+		"label": "t:sections.general.settings.texts_aligment.label"
+	  },
+      {
+        "type": "checkbox",
+        "id": "hover_underline",
+        "default": false,
+        "label": "t:sections.general.settings.hover_underline.label"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_products_count",
+        "default": true,
+		"label": "t:sections.collection-list.settings.show_products_count.label"
+      },
+	  {
+		"type": "select",
+		"id": "texts_aligment_mobile",
+		"options": [
+		  {
+			"value": "text-left-mobile",
+			"label": "t:sections.general.settings.texts_aligment.options__left.label"
+		  },
+		  {
+			"value": "text-center-mobile",
+			"label": "t:sections.general.settings.texts_aligment.options__center.label"
+		  }
+		],
+		"default": "text-center-mobile",
+		"label": "t:sections.collection-list.settings.texts_aligment_mobile.label"
+	  },
+      {
+        "type": "header",
+        "content": "t:sections.general.settings.header_colors.content"
+      },
+      {
+        "type": "color",
+        "id": "color_subheading",
+        "default": "rgba(0,0,0,0)",
+        "label": "t:sections.general.settings.subheading.label"
+      },
+      {
+        "type": "color",
+        "id": "color_heading",
+        "default": "rgba(0,0,0,0)",
+        "label": "t:sections.general.settings.heading.label"
+      },
+      {
+        "type": "color",
+        "id": "color_link",
+        "default": "rgba(0,0,0,0)",
+        "label": "t:sections.general.settings.name_link.label"
+      },
+      {
+        "type": "paragraph",
+		"content": "t:sections.collection-list.settings.paragraph_1.content"
+      },
+      {
+        "type": "color",
+        "id": "color_texts",
+        "default": "rgba(0,0,0,0)",
+		"label": "t:sections.collection-list.settings.color_texts.label"
+      },
+      {
+        "type": "color",
+        "id": "color_button",
+        "default": "rgba(0,0,0,0)",
+		"label": "t:sections.collection-list.settings.color_button.label"
+      },
+      {
+        "type": "color",
+        "id": "color_button_hover",
+        "default": "rgba(0,0,0,0)",
+		"label": "t:sections.collection-list.settings.color_button_hover.label"
+      }
+	],
+    "blocks": [
+      {
+        "type": "featured_collection",
+        "name": "t:sections.collection-list.blocks.featured_collection.name",
+        "settings": [
+          {
+            "type": "collection",
+            "id": "collection",
+            "label": "t:sections.collection-list.blocks.featured_collection.settings.collection.label"
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "t:sections.general.settings.image.label"
+          },
+          {
+            "type": "text",
+            "id": "collection_name",
+			"label": "t:sections.collection-list.blocks.featured_collection.settings.collection_name.label"
+          },
+          {
+            "type": "url",
+            "id": "custom_link",
+			"label": "t:sections.collection-list.blocks.featured_collection.settings.custom_link.label",
+			"info": "t:sections.collection-list.blocks.featured_collection.settings.custom_link.info"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+      	"name": "ca-collection-list",
+        "blocks": [
+          {
+            "type": "featured_collection"
+          },
+          {
+            "type": "featured_collection"
+          },
+          {
+            "type": "featured_collection"
+          },
+          {
+            "type": "featured_collection"
+          },
+          {
+            "type": "featured_collection"
+          },
+          {
+            "type": "featured_collection"
+          }
+        ]
+      }
+    ],
+	"templates": ["404", "article", "blog", "cart", "collection", "list-collections", "gift_card", "index", "page", "product", "search"]
+  }
+{% endschema %}
